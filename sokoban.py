@@ -4,6 +4,9 @@ import numpy as np
 import heapq
 import time
 
+from guppy import hpy
+h = hpy()
+
 
 class PriorityQueue:
     """Define a PriorityQueue data structure that will be used"""
@@ -219,8 +222,9 @@ def breadthFirstSearch():
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
             #
-            print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
             
+            print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
+
             break
         if node[-1] not in exploredSet:
             exploredSet.add(node[-1])
@@ -250,7 +254,8 @@ def depthFirstSearch():
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
             #
-            print(",".join(node_action[1:]).replace(",", ""))
+            print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
+
             break
         if node[-1] not in exploredSet:
             exploredSet.add(node[-1])
@@ -328,7 +333,8 @@ def aStarSearch():
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
             #
-            print(",".join(node_action[1:]).replace(",", ""))
+            print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
+
             break
         if node[-1] not in exploredSet:
             exploredSet.add(node[-1])
@@ -416,7 +422,7 @@ def printAllSolve(node, node_action):
 if __name__ == "__main__":
     time_start = time.time()
     layout, method = readCommand(sys.argv[1:]).values()
-
+    memo = sys.argv[4]
     gameState = transferToGameState(layout)
     # phong
     # print('Convert')
@@ -439,3 +445,9 @@ if __name__ == "__main__":
         raise ValueError("Invalid method.")
     time_end = time.time()
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
+    
+    if memo == "memo":
+        print("\n \n \n -------------MEMORY USAGE PROFILe----------------")
+        print(h.heap())
+    else: 
+        print("DISPLAY MEMORY MODE OFF")
