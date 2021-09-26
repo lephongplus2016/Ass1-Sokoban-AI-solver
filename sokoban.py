@@ -423,27 +423,29 @@ def printAllSolve(node, node_action):
                 re += new_map[irow][icol]
         print(re)
 
+def testPrint():
+    print("HAHAHA")
 if __name__ == "__main__":
     
     time_start = time.time()
-
     layout, method, memory = readCommand(sys.argv[1:]).values()
     gameState = transferToGameState(layout)
     # phong
     # print('Convert')
     # for x in gameState:
     #     print(x)
+    mem_usage = 0
     posWalls = PosOfWalls(gameState)
     posGoals = PosOfGoals(gameState)
     if method == "astar":
         print('SEARCH WITH STRATEGY ASTAR')
-        mem_usage = memory_usage(aStarSearch) # process memory calculator and functuon aStarSearch
+        mem_usage = memory_usage(aStarSearch) if memory else aStarSearch()
     elif method == "dfs":
         print('SEARCH WITH STRATEGY DFS')
-        mem_usage =memory_usage(depthFirstSearch)
+        mem_usage = memory_usage(depthFirstSearch) if memory else depthFirstSearch()
     elif method == "bfs":
         print('SEARCH WITH STRATEGY BrFS')
-        mem_usage = memory_usage(breadthFirstSearch) 
+        mem_usage = memory_usage(breadthFirstSearch) if memory else breadthFirstSearch()
     # elif method == "ucs":
     #     uniformCostSearch()
     else:
@@ -453,9 +455,8 @@ if __name__ == "__main__":
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
 
     if memory:
-        print("\n" 'Memory usage (in chunks of .1 seconds): %s' % mem_usage, ' MB')
-        print('Maximum memory usage: %s' % max(mem_usage), " MB")
-
-
+        print("\n")
+        print('Memory usage (in chunks of .1 seconds): %s' % mem_usage, ' MiB')
+        print('Maximum memory usage: %s' % max(mem_usage), " MiB")
     else: 
         print("DISPLAY MEMORY MODE OFF")
