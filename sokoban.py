@@ -40,14 +40,14 @@ def transferToGameState(layout):
                 layout[irow][icol] = 0  # free space
             elif layout[irow][icol] == "#":
                 layout[irow][icol] = 1  # wall
-            elif layout[irow][icol] == "&":
+            elif layout[irow][icol] == "@":
                 layout[irow][icol] = 2  # player
-            elif layout[irow][icol] == "B":
+            elif layout[irow][icol] == "$":
                 layout[irow][icol] = 3  # box
             elif layout[irow][icol] == ".":
                 layout[irow][icol] = 4  # goal
-            elif layout[irow][icol] == "X":
-                layout[irow][icol] = 5  # box on goal
+            elif layout[irow][icol] == "*":
+                layout[irow][icol] = 5  # box oox on goal
         colsNum = len(layout[irow])
         if colsNum < maxColsNum:
             layout[irow].extend([1 for _ in range(maxColsNum - colsNum)])
@@ -377,16 +377,19 @@ def printCurrentMap(pos):
     maxColsNum = max([len(x) for x in new_map])
     for irow in range(len(new_map)):
         for icol in range(len(new_map[irow])):
-            if new_map[irow][icol] == "&":  new_map[irow][icol] = " "  # player
-            elif new_map[irow][icol] == "B":  new_map[irow][icol] = " "  # box
+            if new_map[irow][icol] == "@":  new_map[irow][icol] = " "  # player
+            elif (new_map[irow][icol] == "$"):  new_map[irow][icol] = " "  # box
 
     pos_player = pos[0]
     pos_box = pos[1]
     num_box = len(pos_box)
-    new_map[pos_player[0]][pos_player[1]] = "&"
+    new_map[pos_player[0]][pos_player[1]] = "@"
 
     for i in range(num_box):
-        new_map[pos_box[i][0]][pos_box[i][1]] = "B"
+        if new_map[pos_box[i][0]][pos_box[i][1]] == ".": new_map[pos_box[i][0]][pos_box[i][1]] = "*"
+        else : new_map[pos_box[i][0]][pos_box[i][1]] = "$"
+        
+        
 
     return new_map
 
@@ -395,13 +398,13 @@ def printAllSolve(node, node_action):
         if(node_action[i]==0):
             print('\nSTART')
         elif(node_action[i]=='u' or node_action[i]=='U'):
-            print('\n'+str(i)+'. NEXT STEP: UP')
+            print('\n; '+str(i)+'. NEXT STEP: UP')
         elif(node_action[i]=='d' or node_action[i]=='D'):
-            print('\n'+str(i)+'. NEXT STEP: DOWN')
+            print('\n; '+str(i)+'. NEXT STEP: DOWN')
         elif(node_action[i]=='l' or node_action[i]=='L'):
-            print('\n'+str(i)+'. NEXT STEP: LEFT')
+            print('\n; '+str(i)+'. NEXT STEP: LEFT')
         elif(node_action[i]=='r' or node_action[i]=='R'):
-            print('\n'+str(i)+'. NEXT STEP: RIGHT')
+            print('\n; '+str(i)+'. NEXT STEP: RIGHT')
         
         new_map = printCurrentMap(node[i])
         re = ''
