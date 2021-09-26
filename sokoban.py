@@ -3,11 +3,8 @@ import collections
 import numpy as np
 import heapq
 import time
-
-from guppy import hpy
-h = hpy()
+from memory_profiler import memory_usage
 import argparse
-
 
 class PriorityQueue:
     """Define a PriorityQueue data structure that will be used"""
@@ -328,6 +325,8 @@ def aStarSearch():
     while frontier:
         node = frontier.pop()
         node_action = actions.pop()
+    
+
         if isEndState(node[-1][-1]):
              # phong
             print("SOLUTION : ")
@@ -347,6 +346,7 @@ def aStarSearch():
                 Heuristic = heuristic(newPosPlayer, newPosBox)
                 frontier.push(node + [(newPosPlayer, newPosBox)], Heuristic + Cost)
                 actions.push(node_action + [action[-1]], Heuristic + Cost)
+    
 
 
 """Read command"""
@@ -437,22 +437,25 @@ if __name__ == "__main__":
     posGoals = PosOfGoals(gameState)
     if method == "astar":
         print('SEARCH WITH STRATEGY ASTAR')
-        aStarSearch()
+        mem_usage = memory_usage(aStarSearch) # process memory calculator and functuon aStarSearch
     elif method == "dfs":
         print('SEARCH WITH STRATEGY DFS')
-        depthFirstSearch()
+        mem_usage =memory_usage(depthFirstSearch)
     elif method == "bfs":
         print('SEARCH WITH STRATEGY BrFS')
-        breadthFirstSearch()
+        mem_usage = memory_usage(breadthFirstSearch) 
     # elif method == "ucs":
     #     uniformCostSearch()
     else:
         raise ValueError("Invalid method.")
+    
     time_end = time.time()
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
 
     if memory:
-        print("\n \n \n -------------MEMORY USAGE PROFILE----------------")
-        print(h.heap())
+        print("\n" 'Memory usage (in chunks of .1 seconds): %s' % mem_usage, ' MB')
+        print('Maximum memory usage: %s' % max(mem_usage), " MB")
+
+
     else: 
         print("DISPLAY MEMORY MODE OFF")
