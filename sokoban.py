@@ -6,6 +6,7 @@ import time
 
 from guppy import hpy
 h = hpy()
+import argparse
 
 
 class PriorityQueue:
@@ -365,12 +366,15 @@ def readCommand(argv):
     parser.add_option(
         "-m", "--method", dest="agentMethod", help="research method", default="bfs"
     )
+    parser.add_option("-M", "--Memory",
+                      action="store_true", dest="memory")
     args = dict()
     options, _ = parser.parse_args(argv)
     with open("sokobanLevels/" + options.sokobanLevels, "r") as f:
         layout = f.readlines()
     args["layout"] = layout
     args["method"] = options.agentMethod
+    args["memory"] = options.memory
     return args
 
 
@@ -420,9 +424,10 @@ def printAllSolve(node, node_action):
         print(re)
 
 if __name__ == "__main__":
+    
     time_start = time.time()
-    layout, method = readCommand(sys.argv[1:]).values()
-    memo = sys.argv[4]
+
+    layout, method, memory = readCommand(sys.argv[1:]).values()
     gameState = transferToGameState(layout)
     # phong
     # print('Convert')
@@ -445,9 +450,9 @@ if __name__ == "__main__":
         raise ValueError("Invalid method.")
     time_end = time.time()
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
-    
-    if memo == "memo":
-        print("\n \n \n -------------MEMORY USAGE PROFILe----------------")
+
+    if memory:
+        print("\n \n \n -------------MEMORY USAGE PROFILE----------------")
         print(h.heap())
     else: 
         print("DISPLAY MEMORY MODE OFF")

@@ -1,6 +1,11 @@
 ## run
 ```
-$ python sokoban.py -l test1.txt -m bfs memo
+$ python sokoban.py -l test1.txt -m bfs
+
+*with memory display
+
+$ python sokoban.py -l test1.txt -m bfs -M
+
 ```
 ```
 rUUdRdrUUluL
