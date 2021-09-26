@@ -219,7 +219,7 @@ def breadthFirstSearch():
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
             #
-            print(",".join(node_action[1:]).replace(",", ""))
+            print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
             
             break
         if node[-1] not in exploredSet:
