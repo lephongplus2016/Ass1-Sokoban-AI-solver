@@ -9,28 +9,39 @@ import argparse
 class PriorityQueue:
     """Define a PriorityQueue data structure that will be used"""
 
+    #Constructor
     def __init__(self):
         self.Heap = []
         self.Count = 0
 
+    # Push to Priority Queue with item and its priority
     def push(self, item, priority):
         entry = (priority, self.Count, item)
         heapq.heappush(self.Heap, entry)
         self.Count += 1
-
+    # Pop the smallest item from Queue
     def pop(self):
         (_, _, item) = heapq.heappop(self.Heap)
         return item
-
+    # check queue empty
     def isEmpty(self):
         return len(self.Heap) == 0
 
 
+
 """Load puzzles and define the rules of sokoban"""
-
-
 def transferToGameState(layout):
-    """Transfer the layout of initial puzzle"""
+    # Transfer the layout of initial puzzle
+    # Parameter is initilization of problem
+    """
+        Layout e.g.:
+            ######
+            #.  .#
+            #    #
+            # $$ #
+            #@   #
+            ######
+    """
     layout = [x.replace("\n", "") for x in layout]
     layout = [",".join(layout[i]) for i in range(len(layout))]
     layout = [x.split(",") for x in layout]
@@ -48,11 +59,21 @@ def transferToGameState(layout):
             elif layout[irow][icol] == ".":
                 layout[irow][icol] = 4  # goal
             elif layout[irow][icol] == "*":
-                layout[irow][icol] = 5  # box oox on goal
+                layout[irow][icol] = 5  # box on goal
         colsNum = len(layout[irow])
         if colsNum < maxColsNum:
             layout[irow].extend([1 for _ in range(maxColsNum - colsNum)])
-    return np.array(layout)
+    # return the game state as matrix
+    """
+        Return value e.g.:
+        1 1 1 1 1 1
+        1 4 0 0 4 1
+        1 0 0 0 0 1
+        1 0 3 3 0 1
+        1 2 0 0 0 1
+        1 1 1 1 1 1
+    """ 
+    return np.array(layout) 
 
 
 def PosOfPlayer(gameState):
@@ -86,8 +107,11 @@ def isEndState(posBox):
 
 def isLegalAction(action, posPlayer, posBox):
     """Check if the given action is legal"""
+    # action is an action of allAction (e.g. [[-1, 0, "u"]])
+
     xPlayer, yPlayer = posPlayer
-    if action[-1].isupper():  # the move was a push
+    # the move was a push (Push is upper char)
+    if action[-1].isupper():
         x1, y1 = xPlayer + 2 * action[0], yPlayer + 2 * action[1]
     else:
         x1, y1 = xPlayer + action[0], yPlayer + action[1]
@@ -96,12 +120,15 @@ def isLegalAction(action, posPlayer, posBox):
 
 def legalActions(posPlayer, posBox):
     """Return all legal actions for the agent in the current game state"""
+
+    # Upper char means moving box
     allActions = [
         [-1, 0, "u", "U"],
         [1, 0, "d", "D"],
         [0, -1, "l", "L"],
         [0, 1, "r", "R"],
     ]
+
     xPlayer, yPlayer = posPlayer
     legalActions = []
     for action in allActions:
@@ -110,7 +137,8 @@ def legalActions(posPlayer, posBox):
             action.pop(2)  # drop the little letter
         else:
             action.pop(3)  # drop the upper letter
-        if isLegalAction(action, posPlayer, posBox):
+
+        if isLegalAction(action, posPlayer, posBox): #check if action is illegal action
             legalActions.append(action)
         else:
             continue
@@ -126,31 +154,37 @@ def updateState(posPlayer, posBox, action):
     ]  # the current position of player
     posBox = [list(x) for x in posBox]
     if action[-1].isupper():  # if pushing, update the position of box
-        posBox.remove(newPosPlayer)
-        posBox.append([xPlayer + 2 * action[0], yPlayer + 2 * action[1]])
-    posBox = tuple(tuple(x) for x in posBox)
-    newPosPlayer = tuple(newPosPlayer)
-    return newPosPlayer, posBox
+        posBox.remove(newPosPlayer) # remove previous box's position
+        posBox.append([xPlayer + 2 * action[0], yPlayer + 2 * action[1]]) # add current box's position
+    
+    
+    posBox = tuple(tuple(x) for x in posBox) # Save new box position as a new tuple
+    newPosPlayer = tuple(newPosPlayer) # Save new player position as a new tuple
+    return newPosPlayer, posBox # return new value
 
 
 def isFailed(posBox):
     """This function used to observe if the state is potentially failed, then prune the search"""
+    #rotate deadlock state
     rotatePattern = [
         [0, 1, 2, 3, 4, 5, 6, 7, 8],
         [2, 5, 8, 1, 4, 7, 0, 3, 6],
         [0, 1, 2, 3, 4, 5, 6, 7, 8][::-1],
         [2, 5, 8, 1, 4, 7, 0, 3, 6][::-1],
     ]
+    #flip deadlock state
     flipPattern = [
         [2, 1, 0, 5, 4, 3, 8, 7, 6],
         [0, 3, 6, 1, 4, 7, 2, 5, 8],
         [2, 1, 0, 5, 4, 3, 8, 7, 6][::-1],
         [0, 3, 6, 1, 4, 7, 2, 5, 8][::-1],
     ]
+    # merge list to check all situation
     allPattern = rotatePattern + flipPattern
 
     for box in posBox:
         if box not in posGoals:
+            # 9 move direction from current posBox
             board = [
                 (box[0] - 1, box[1] - 1),
                 (box[0] - 1, box[1]),
@@ -162,6 +196,8 @@ def isFailed(posBox):
                 (box[0] + 1, box[1]),
                 (box[0] + 1, box[1] + 1),
             ]
+
+            #check Box in corner
             for pattern in allPattern:
                 newBoard = [board[i] for i in pattern]
                 if newBoard[1] in posWalls and newBoard[5] in posWalls:
@@ -283,34 +319,6 @@ def cost(actions):
     return len([x for x in actions if x.islower()])
 
 
-# def uniformCostSearch():
-#     """Implement uniformCostSearch approach"""
-#     beginBox = PosOfBoxes(gameState)
-#     beginPlayer = PosOfPlayer(gameState)
-
-#     startState = (beginPlayer, beginBox)
-#     frontier = PriorityQueue()
-#     frontier.push([startState], 0)
-#     exploredSet = set()
-#     actions = PriorityQueue()
-#     actions.push([0], 0)
-#     while frontier:
-#         node = frontier.pop()
-#         node_action = actions.pop()
-#         if isEndState(node[-1][-1]):
-#             print(",".join(node_action[1:]).replace(",", ""))
-#             break
-#         if node[-1] not in exploredSet:
-#             exploredSet.add(node[-1])
-#             Cost = cost(node_action[1:])
-#             for action in legalActions(node[-1][0], node[-1][1]):
-#                 newPosPlayer, newPosBox = updateState(node[-1][0], node[-1][1], action)
-#                 if isFailed(newPosBox):
-#                     continue
-#                 frontier.push(node + [(newPosPlayer, newPosBox)], Cost)
-#                 actions.push(node_action + [action[-1]], Cost)
-
-
 def aStarSearch():
     """Implement aStarSearch approach"""
     beginBox = PosOfBoxes(gameState)
@@ -350,11 +358,9 @@ def aStarSearch():
 
 
 """Read command"""
-
-
 def readCommand(argv):
-    from optparse import OptionParser
 
+    from optparse import OptionParser
     parser = OptionParser()
     parser.add_option(
         "-l",
@@ -399,8 +405,7 @@ def printCurrentMap(pos):
         if new_map[pos_box[i][0]][pos_box[i][1]] == ".": new_map[pos_box[i][0]][pos_box[i][1]] = "*"
         else : new_map[pos_box[i][0]][pos_box[i][1]] = "$"
         
-        
-
+         
     return new_map
 
 def printAllSolve(node, node_action): 
@@ -423,20 +428,26 @@ def printAllSolve(node, node_action):
                 re += new_map[irow][icol]
         print(re)
 
-def testPrint():
-    print("HAHAHA")
 if __name__ == "__main__":
-    
+    # Start time for calculate time used for each method
     time_start = time.time()
+
+    # Load layout, method, memory option from user input via terminal
+        # layout is the initialization of the problem
     layout, method, memory = readCommand(sys.argv[1:]).values()
+
+    # transfer Layout loaded to Game state
     gameState = transferToGameState(layout)
-    # phong
-    # print('Convert')
-    # for x in gameState:
-    #     print(x)
+
+    # Start memory usage for calculate memory used for each method
     mem_usage = 0
+
+    # get position of walls and goals base on game state
     posWalls = PosOfWalls(gameState)
     posGoals = PosOfGoals(gameState)
+
+    # Run method base on user's choice
+    # Calculate method using for each method
     if method == "astar":
         print('SEARCH WITH STRATEGY ASTAR')
         mem_usage = memory_usage(aStarSearch) if memory else aStarSearch()
@@ -446,14 +457,16 @@ if __name__ == "__main__":
     elif method == "bfs":
         print('SEARCH WITH STRATEGY BrFS')
         mem_usage = memory_usage(breadthFirstSearch) if memory else breadthFirstSearch()
-    # elif method == "ucs":
-    #     uniformCostSearch()
     else:
         raise ValueError("Invalid method.")
     
+    # End time for calculate time used for each method
     time_end = time.time()
+
+    # Print time used
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
 
+    # Print memory used
     if memory:
         print("\n")
         print('Memory usage (in chunks of .1 seconds): %s' % mem_usage, ' MiB')
