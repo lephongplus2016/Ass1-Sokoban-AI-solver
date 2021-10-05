@@ -236,68 +236,100 @@ def isFailed(posBox):
 
 def breadthFirstSearch():
     """Implement breadthFirstSearch approach"""
+    # Get the original position of the boxes and the player
     beginBox = PosOfBoxes(gameState)
     beginPlayer = PosOfPlayer(gameState)
 
+    # Initalize the game's state space
     startState = (
         beginPlayer,
         beginBox,
-    )  # e.g. ((2, 2), ((2, 3), (3, 4), (4, 4), (6, 1), (6, 4), (6, 5)))
-    frontier = collections.deque([[startState]])  # store states
-    actions = collections.deque([[0]])  # store actions
-    exploredSet = set()
-    while frontier:
-        node = frontier.popleft()
+    )  # e.g. testcase1. ((4, 1), ((3, 2), (3, 3)))
 
+    # store states, the deque object acts as a queue- FIFO. 
+    # A container for nodes that have been found in the search tree.
+    # first, we will save the game start state to the frontier
+    frontier = collections.deque([[startState]])  
+    # store actions
+    actions = collections.deque([[0]]) 
+    # store visted nodes 
+    exploredSet = set()
+    # while frontier not empty:
+    while frontier:
+        # get the node from the left side of the frontier
+        node = frontier.popleft()
+        # get the action from the left side of the actions
         node_action = actions.popleft()
-        if isEndState(node[-1][-1]):
-            # phong
+        if isEndState(node[-1][-1]): # if the game end (matched with goal state):
+            # print the solution
             print("SOLUTION : ")
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
-            #
             
             print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
 
             break
-        if node[-1] not in exploredSet:
+        # if the current node is unvisited:
+        if node[-1] not in exploredSet: 
+            # add this node to the exploredSet
             exploredSet.add(node[-1])
+            # consider all next moves with the current node : UP - DOWN - LEFT -RIGHT
             for action in legalActions(node[-1][0], node[-1][1]):
+                # new game state when doing action
                 newPosPlayer, newPosBox = updateState(node[-1][0], node[-1][1], action)
+                # check the deadlock
                 if isFailed(newPosBox):
-                    continue
+                    continue # skip if deadlock
+                # Add new state to the right side of the deque.
                 frontier.append(node + [(newPosPlayer, newPosBox)])
+                # Add this action to the right side of the deque.
                 actions.append(node_action + [action[-1]])
 
 
 def depthFirstSearch():
     """Implement depthFirstSearch approach"""
+    # Get the original position of the boxes and the player
     beginBox = PosOfBoxes(gameState)
     beginPlayer = PosOfPlayer(gameState)
 
-    startState = (beginPlayer, beginBox)
+    # Initalize the game's state space
+    startState = (beginPlayer, beginBox) # e.g. testcase1. ((4, 1), ((3, 2), (3, 3)))
+    # store states, the deque object acts as a stack- FILO. 
+    # A container for nodes that have been found in the search tree.
+    # first, we will save the game start state to the frontier.
     frontier = collections.deque([[startState]])
-    exploredSet = set()
+    # store actions
     actions = [[0]]
+    # store visted nodes 
+    exploredSet = set()
+    # while frontier not empty:
     while frontier:
+        # get the node from the right side of the frontier
         node = frontier.pop()
+        # get the action from the right side of the actions
         node_action = actions.pop()
-        if isEndState(node[-1][-1]):
-             # phong
+        if isEndState(node[-1][-1]): # if the game end (matched with goal state):
+            # print the solution
             print("SOLUTION : ")
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
             #
             print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
-
             break
+        # if the current node is unvisited:
         if node[-1] not in exploredSet:
+            # add this node to the exploredSet
             exploredSet.add(node[-1])
+            # consider all next moves with the current node : UP - DOWN - LEFT -RIGHT
             for action in legalActions(node[-1][0], node[-1][1]):
+                # new game state when doing action
                 newPosPlayer, newPosBox = updateState(node[-1][0], node[-1][1], action)
+                # check the deadlock
                 if isFailed(newPosBox):
-                    continue
+                    continue # skip if deadlock
+                # Add new state to the right side of the deque.
                 frontier.append(node + [(newPosPlayer, newPosBox)])
+                # Add this action to the right side of the deque.
                 actions.append(node_action + [action[-1]])
 
 
