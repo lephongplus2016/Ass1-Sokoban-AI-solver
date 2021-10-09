@@ -162,7 +162,7 @@ def updateState(posPlayer, posBox, action):
     newPosPlayer = tuple(newPosPlayer) # Save new player position as a new tuple
     return newPosPlayer, posBox # return new value
 
-
+#This is a function used to check if the box is stuck among the walls or other boxes leading to failure or not
 def isFailed(posBox):
     """This function used to observe if the state is potentially failed, then prune the search"""
     #rotate deadlock state
@@ -184,48 +184,59 @@ def isFailed(posBox):
 
     for box in posBox:
         if box not in posGoals:
-            # 9 move direction from current posBox
+            #these are the surrounding positions
             board = [
-                (box[0] - 1, box[1] - 1),
-                (box[0] - 1, box[1]),
-                (box[0] - 1, box[1] + 1),
-                (box[0], box[1] - 1),
-                (box[0], box[1]),
-                (box[0], box[1] + 1),
-                (box[0] + 1, box[1] - 1),
-                (box[0] + 1, box[1]),
-                (box[0] + 1, box[1] + 1),
+                (box[0] - 1, box[1] - 1),     #top left
+                (box[0] - 1, box[1]),         #top
+                (box[0] - 1, box[1] + 1),     #top right
+                (box[0], box[1] - 1),         #left
+                (box[0], box[1]),             #center
+                (box[0], box[1] + 1),         #right
+                (box[0] + 1, box[1] - 1),     #bottom left
+                (box[0] + 1, box[1]),         #bottom
+                (box[0] + 1, box[1] + 1),     #bottom right
             ]
 
             #check Box in corner
             for pattern in allPattern:
                 newBoard = [board[i] for i in pattern]
+#   W       or      B W     or        W      or    W B
+#   B W             W               W B              W
                 if newBoard[1] in posWalls and newBoard[5] in posWalls:
                     return True
+#   B W     or      B B     or      W B      or     W W
+#   B W             W W             W B             B B
                 elif (
                     newBoard[1] in posBox
                     and newBoard[2] in posWalls
                     and newBoard[5] in posWalls
                 ):
                     return True
+#   B W     or      B B     or      B B      or     W B
+#   B B             B W             W B             B B
                 elif (
                     newBoard[1] in posBox
                     and newBoard[2] in posWalls
                     and newBoard[5] in posBox
                 ):
                     return True
+#   B B
+#   B B
                 elif (
                     newBoard[1] in posBox
                     and newBoard[2] in posBox
                     and newBoard[5] in posBox
                 ):
                     return True
+#     B W       or      B W           or        W   B       or      W   W
+#   W B                   B B                     B W               B B
+#   B   W               W   W                   W B                   W B
                 elif (
                     newBoard[1] in posBox
-                    and newBoard[6] in posBox
+                    # and newBoard[6] in posBox
                     and newBoard[2] in posWalls
                     and newBoard[3] in posWalls
-                    and newBoard[8] in posWalls
+                    # and newBoard[8] in posWalls
                 ):
                     return True
     return False
@@ -336,9 +347,11 @@ def depthFirstSearch():
 def heuristic(posPlayer, posBox):
     """A heuristic function to calculate the overall distance between the else boxes and the else goals"""
     distance = 0
+    # Listing Box that node in goal and sort them
     completes = set(posGoals) & set(posBox)
     sortposBox = list(set(posBox).difference(completes))
     sortposGoals = list(set(posGoals).difference(completes))
+    # Calculate distance amongs box and goal
     for i in range(len(sortposBox)):
         distance += (abs(sortposBox[i][0] - sortposGoals[i][0])) + (
             abs(sortposBox[i][1] - sortposGoals[i][1])
@@ -353,22 +366,30 @@ def cost(actions):
 
 def aStarSearch():
     """Implement aStarSearch approach"""
+    # Get the original position of the boxes and the player
     beginBox = PosOfBoxes(gameState)
     beginPlayer = PosOfPlayer(gameState)
 
-    start_state = (beginPlayer, beginBox)
+    # Initalize the game's state space
+    start_state = (beginPlayer, beginBox)  # e.g. testcase1. ((4, 1), ((3, 2), (3, 3)))
+    # Using prority Queue to store state 
+    # Push starting information (beginPlayer, beginBox) to protity  queue
     frontier = PriorityQueue()
     frontier.push([start_state], heuristic(beginPlayer, beginBox))
+
+    # Create a set to save expelored node
     exploredSet = set()
+    # Get action from state, use heuristc function generate next action and push to Queue
     actions = PriorityQueue()
     actions.push([0], heuristic(beginPlayer, start_state[1]))
     while frontier:
+        # get the node from the frontier of state queue
         node = frontier.pop()
+        # get action from action queue
         node_action = actions.pop()
-    
 
+        #check the soluton have found yet, if so, return and print solution
         if isEndState(node[-1][-1]):
-             # phong
             print("SOLUTION : ")
             printAllSolve(node, node_action)
             print("LIST OF STEPS TO TAKE TO SOLUTION:")
@@ -376,15 +397,23 @@ def aStarSearch():
             print(",".join(node_action[1:]).translate(str.maketrans({',': ' - ', 'U': 'UP','u': 'UP','l': 'LEFT','L': 'LEFT','d': 'DOWN','D': 'DOWN','r': 'RIGHT','R': 'RIGHT',})))
 
             break
+        # if the current node is unvisited: 
         if node[-1] not in exploredSet:
+            # add this node to the exploredSet
             exploredSet.add(node[-1])
+            # Calcutlate the code of the action
             Cost = cost(node_action[1:])
+            # 
             for action in legalActions(node[-1][0], node[-1][1]):
                 newPosPlayer, newPosBox = updateState(node[-1][0], node[-1][1], action)
+                # check the deadlock
                 if isFailed(newPosBox):
-                    continue
+                    continue # skip if deadlock
+                # using Heuristic function to calculate cost of new player's position and new box's position
                 Heuristic = heuristic(newPosPlayer, newPosBox)
+                # enqueue new node to priority queue
                 frontier.push(node + [(newPosPlayer, newPosBox)], Heuristic + Cost)
+                # enqueue new action to priority queue 
                 actions.push(node_action + [action[-1]], Heuristic + Cost)
     
 
@@ -416,6 +445,7 @@ def readCommand(argv):
     return args
 
 
+#This is actually a function used for updating map instead of printing like its name says
 def printCurrentMap(pos):
     # pos = ((4, 2), ((3, 2), (3, 3)))
     new_map = layout
@@ -425,40 +455,42 @@ def printCurrentMap(pos):
     maxColsNum = max([len(x) for x in new_map])
     for irow in range(len(new_map)):
         for icol in range(len(new_map[irow])):
-            if new_map[irow][icol] == "@":  new_map[irow][icol] = " "  # player
-            elif (new_map[irow][icol] == "$"):  new_map[irow][icol] = " "  # box
+            if new_map[irow][icol] == "&":  new_map[irow][icol] = " "  # player
+            elif new_map[irow][icol] == "B":  new_map[irow][icol] = " "  # box
 
     pos_player = pos[0]
     pos_box = pos[1]
     num_box = len(pos_box)
-    new_map[pos_player[0]][pos_player[1]] = "@"
+    new_map[pos_player[0]][pos_player[1]] = "&"
 
     for i in range(num_box):
-        if new_map[pos_box[i][0]][pos_box[i][1]] == ".": new_map[pos_box[i][0]][pos_box[i][1]] = "*"
-        else : new_map[pos_box[i][0]][pos_box[i][1]] = "$"
-        
-         
+        new_map[pos_box[i][0]][pos_box[i][1]] = "B"
+
     return new_map
 
-def printAllSolve(node, node_action): 
+#print indicators for each step
+def printAllSolve(node, node_action):
     for i in range(len(node)):
-        if(node_action[i]==0):
+        if(node_action[i]==0): #start
             print('\nSTART')
-        elif(node_action[i]=='u' or node_action[i]=='U'):
-            print('\n; '+str(i)+'. NEXT STEP: UP')
-        elif(node_action[i]=='d' or node_action[i]=='D'):
-            print('\n; '+str(i)+'. NEXT STEP: DOWN')
-        elif(node_action[i]=='l' or node_action[i]=='L'):
-            print('\n; '+str(i)+'. NEXT STEP: LEFT')
-        elif(node_action[i]=='r' or node_action[i]=='R'):
-            print('\n; '+str(i)+'. NEXT STEP: RIGHT')
-        
+        elif(node_action[i]=='u' or node_action[i]=='U'): #up
+            print('\n'+str(i)+'. NEXT STEP: UP')
+        elif(node_action[i]=='d' or node_action[i]=='D'): #down
+            print('\n'+str(i)+'. NEXT STEP: DOWN')
+        elif(node_action[i]=='l' or node_action[i]=='L'): #left
+            print('\n'+str(i)+'. NEXT STEP: LEFT')
+        elif(node_action[i]=='r' or node_action[i]=='R'): #right
+            print('\n'+str(i)+'. NEXT STEP: RIGHT')
+
+        #update map
         new_map = printCurrentMap(node[i])
         re = ''
         for irow in range(len(new_map)):
             for icol in range(len(new_map[irow])):
                 re += new_map[irow][icol]
+        #print map
         print(re)
+
 
 if __name__ == "__main__":
     # Start time for calculate time used for each method
