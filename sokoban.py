@@ -457,6 +457,7 @@ def printCurrentMap(pos):
         for icol in range(len(new_map[irow])):
             if new_map[irow][icol] == "@":  new_map[irow][icol] = " "  # player
             elif (new_map[irow][icol] == "$"):  new_map[irow][icol] = " "  # box
+            elif (new_map[irow][icol] == "*"):  new_map[irow][icol] = "."  # box on goal
 
     pos_player = pos[0]
     pos_box = pos[1]
@@ -466,24 +467,24 @@ def printCurrentMap(pos):
     for i in range(num_box):
         if new_map[pos_box[i][0]][pos_box[i][1]] == ".": new_map[pos_box[i][0]][pos_box[i][1]] = "*"
         else : new_map[pos_box[i][0]][pos_box[i][1]] = "$"
-        
+    
          
     return new_map
 
 #print indicators for each step
-def printAllSolve(node, node_action):
+def printAllSolve(node, node_action): 
     for i in range(len(node)):
-        if(node_action[i]==0): #start
+        if(node_action[i]==0):
             print('\nSTART')
         elif(node_action[i]=='u' or node_action[i]=='U'): #up
-            print('\n'+str(i)+'. NEXT STEP: UP')
+            print('\n; '+str(i)+'. NEXT STEP: UP')
         elif(node_action[i]=='d' or node_action[i]=='D'): #down
-            print('\n'+str(i)+'. NEXT STEP: DOWN')
+            print('\n; '+str(i)+'. NEXT STEP: DOWN')
         elif(node_action[i]=='l' or node_action[i]=='L'): #left
-            print('\n'+str(i)+'. NEXT STEP: LEFT')
+            print('\n; '+str(i)+'. NEXT STEP: LEFT')
         elif(node_action[i]=='r' or node_action[i]=='R'): #right
-            print('\n'+str(i)+'. NEXT STEP: RIGHT')
-
+            print('\n; '+str(i)+'. NEXT STEP: RIGHT')
+        
         #update map
         new_map = printCurrentMap(node[i])
         re = ''
@@ -492,7 +493,6 @@ def printAllSolve(node, node_action):
                 re += new_map[irow][icol]
         #print map
         print(re)
-
 
 if __name__ == "__main__":
     # Start time for calculate time used for each method
