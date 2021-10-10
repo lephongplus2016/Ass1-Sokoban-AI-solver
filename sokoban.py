@@ -372,12 +372,12 @@ def aStarSearch():
 
     # Initalize the game's state space
     start_state = (beginPlayer, beginBox)  # e.g. testcase1. ((4, 1), ((3, 2), (3, 3)))
-    # Using prority Queue to store state 
-    # Push starting information (beginPlayer, beginBox) to protity  queue
+    # Using priority Queue to store state 
+    # Push starting information (beginPlayer, beginBox) to priority  queue
     frontier = PriorityQueue()
     frontier.push([start_state], heuristic(beginPlayer, beginBox))
 
-    # Create a set to save expelored node
+    # Create a set to save explored node
     exploredSet = set()
     # Get action from state, use heuristc function generate next action and push to Queue
     actions = PriorityQueue()
@@ -388,7 +388,7 @@ def aStarSearch():
         # get action from action queue
         node_action = actions.pop()
 
-        #check the soluton have found yet, if so, return and print solution
+        #check the solution have found yet, if so, return and print solution
         if isEndState(node[-1][-1]):
             print("SOLUTION : ")
             printAllSolve(node, node_action)
@@ -455,17 +455,19 @@ def printCurrentMap(pos):
     maxColsNum = max([len(x) for x in new_map])
     for irow in range(len(new_map)):
         for icol in range(len(new_map[irow])):
-            if new_map[irow][icol] == "&":  new_map[irow][icol] = " "  # player
-            elif new_map[irow][icol] == "B":  new_map[irow][icol] = " "  # box
+            if new_map[irow][icol] == "@":  new_map[irow][icol] = " "  # player
+            elif (new_map[irow][icol] == "$"):  new_map[irow][icol] = " "  # box
 
     pos_player = pos[0]
     pos_box = pos[1]
     num_box = len(pos_box)
-    new_map[pos_player[0]][pos_player[1]] = "&"
+    new_map[pos_player[0]][pos_player[1]] = "@"
 
     for i in range(num_box):
-        new_map[pos_box[i][0]][pos_box[i][1]] = "B"
-
+        if new_map[pos_box[i][0]][pos_box[i][1]] == ".": new_map[pos_box[i][0]][pos_box[i][1]] = "*"
+        else : new_map[pos_box[i][0]][pos_box[i][1]] = "$"
+        
+         
     return new_map
 
 #print indicators for each step
