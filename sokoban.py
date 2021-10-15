@@ -228,15 +228,13 @@ def isFailed(posBox):
                     and newBoard[5] in posBox
                 ):
                     return True
-#     B W       or      B W           or        W   B       or      W   W
+#     B W       or        W           or                    or      W   
 #   W B                   B B                     B W               B B
-#   B   W               W   W                   W B                   W B
+#                           W                   W B                   W 
                 elif (
                     newBoard[1] in posBox
-                    # and newBoard[6] in posBox
                     and newBoard[2] in posWalls
-                    and newBoard[3] in posWalls
-                    # and newBoard[8] in posWalls
+                    and newBoard[3] in posWalls     
                 ):
                     return True
     return False
