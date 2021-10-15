@@ -3,8 +3,8 @@ import collections
 import numpy as np
 import heapq
 import time
-from memory_profiler import memory_usage
-import argparse
+# from memory_profiler import memory_usage
+# import argparse
 
 class PriorityQueue:
     """Define a PriorityQueue data structure that will be used"""
@@ -428,20 +428,18 @@ def readCommand(argv):
         "--level",
         dest="sokobanLevels",
         help="level of game to play",
-        default="level1.txt",
+        default="miniTest1.txt",
     )
     parser.add_option(
         "-m", "--method", dest="agentMethod", help="research method", default="bfs"
     )
-    parser.add_option("-M", "--Memory",
-                      action="store_true", dest="memory")
+    
     args = dict()
     options, _ = parser.parse_args(argv)
     with open("sokobanLevels/" + options.sokobanLevels, "r") as f:
         layout = f.readlines()
     args["layout"] = layout
     args["method"] = options.agentMethod
-    args["memory"] = options.memory
     return args
 
 
@@ -498,15 +496,12 @@ if __name__ == "__main__":
     # Start time for calculate time used for each method
     time_start = time.time()
 
-    # Load layout, method, memory option from user input via terminal
+    # Load layout, method option from user input via terminal
         # layout is the initialization of the problem
-    layout, method, memory = readCommand(sys.argv[1:]).values()
+    layout, method = readCommand(sys.argv[1:]).values()
 
     # transfer Layout loaded to Game state
     gameState = transferToGameState(layout)
-
-    # Start memory usage for calculate memory used for each method
-    mem_usage = 0
 
     # get position of walls and goals base on game state
     posWalls = PosOfWalls(gameState)
@@ -516,13 +511,13 @@ if __name__ == "__main__":
     # Calculate method using for each method
     if method == "astar":
         print('SEARCH WITH STRATEGY ASTAR')
-        mem_usage = memory_usage(aStarSearch) if memory else aStarSearch()
+        aStarSearch()
     elif method == "dfs":
         print('SEARCH WITH STRATEGY DFS')
-        mem_usage = memory_usage(depthFirstSearch) if memory else depthFirstSearch()
+        depthFirstSearch()
     elif method == "bfs":
         print('SEARCH WITH STRATEGY BrFS')
-        mem_usage = memory_usage(breadthFirstSearch) if memory else breadthFirstSearch()
+        breadthFirstSearch()
     else:
         raise ValueError("Invalid method.")
     
@@ -532,10 +527,4 @@ if __name__ == "__main__":
     # Print time used
     print("Runtime of %s: %.2f second." % (method, time_end - time_start))
 
-    # Print memory used
-    if memory:
-        print("\n")
-        print('Memory usage (in chunks of .1 seconds): %s' % mem_usage, ' MiB')
-        print('Maximum memory usage: %s' % max(mem_usage), " MiB")
-    else: 
-        print("DISPLAY MEMORY MODE OFF")
+
